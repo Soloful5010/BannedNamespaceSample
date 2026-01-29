@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "MySampleApp.Analyzer": {
+      "commandName": "Project"
+    },
+    "DebugAnalyzer": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\MySampleApp\\MySampleApp.csproj"
+    }
+  }
+}

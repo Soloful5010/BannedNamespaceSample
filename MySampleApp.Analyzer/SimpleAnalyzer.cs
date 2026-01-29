@@ -1,18 +1,15 @@
-﻿using Microsoft.CodeAnalysis;
+﻿#pragma warning disable RS2008
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System;
 using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class SimpleAnalyzer : DiagnosticAnalyzer {
     public readonly static string[] BannedNamespaces = [
-        "MNGuiTest.MNGui",
-        "ConsoleApp1.MyLib"
+        "MySampleApp.MyLib"
     ];
 
     private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
@@ -31,7 +28,6 @@ public class SimpleAnalyzer : DiagnosticAnalyzer {
         context.EnableConcurrentExecution();
 
         // Register action
-        //context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
         context.RegisterSyntaxNodeAction(AnalyzeUsing, SyntaxKind.UsingDirective);
         context.RegisterSyntaxNodeAction(AnalyzeDeclareNamespace, SyntaxKind.NamespaceDeclaration, SyntaxKind.FileScopedNamespaceDeclaration);
     }
@@ -45,16 +41,16 @@ public class SimpleAnalyzer : DiagnosticAnalyzer {
             nameSyn = fsnds.Name;
         }
 
-        CheckBannedNameSyntax(context, nameSyn);
+        ReportBannedNameSyntax(context, nameSyn);
     }
 
     private static void AnalyzeUsing(SyntaxNodeAnalysisContext context) {
         if (context.Node is UsingDirectiveSyntax usingNode) {
-            CheckBannedNameSyntax(context, usingNode.Name);
+            ReportBannedNameSyntax(context, usingNode.Name);
         }
     }
 
-    private static void CheckBannedNameSyntax(SyntaxNodeAnalysisContext context, NameSyntax? nameSyn) {
+    private static void ReportBannedNameSyntax(SyntaxNodeAnalysisContext context, NameSyntax? nameSyn) {
         if (nameSyn == null) return;
 
         var name = nameSyn.ToString();
@@ -66,14 +62,4 @@ public class SimpleAnalyzer : DiagnosticAnalyzer {
         }
     }
 
-    //private static void AnalyzeSymbol(SymbolAnalysisContext context) {
-    //    // ここを適当に書き換える（これはサンプル通りの全部Lowerじゃないクラス名があった場合に警告を出す）
-    //    var namedTypeSymbol = (INamedTypeSymbol)context.Symbol;
-
-    //    if (namedTypeSymbol.Name.ToCharArray().Any(char.IsLower)) {
-    //        // Diagnosticを作ってReportDiagnosticに詰める。
-    //        var diagnostic = Diagnostic.Create(Rule, namedTypeSymbol.Locations[0], namedTypeSymbol.Name);
-    //        context.ReportDiagnostic(diagnostic);
-    //    }
-    //}
 }
